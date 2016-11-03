@@ -1,0 +1,60 @@
+For starters you can simplify the first part by utilizing the fact that indexOf can accept a second character indicating start point. This would lead to something like the following:
+
+// Find indices for IP-address
+int startIndex = resp.indexOf('\"', resp.indexOf("ip=")) + 1;
+int endIndex = resp.indexOf('\"', startIndex);
+
+String ipString = resp.substring(startIndex, endIndex);
+Secondly, you can simplify the conversion by utilizing the substring method a little, and improve a little on performance by using StringBuilder, like in the following:
+
+StringBuilder ipAddress = new StringBuilder();
+int lenIpString = ipString.length();
+
+//get two and two bytes from hex string and append to ipaddress 
+if (lenIpString == 8) {
+    long ipPart;
+    for(int i = 0; i < lenIpString; i += 2)
+    {
+         ipPart = Long.parseLong(ipString.substring(i, i + 2), 16);
+         ipAddress.append(String.format("%d.", ipPart));
+    }
+
+} else {
+    throw new Exception("IP-string not long enough");
+}
+Note that this also does something if in the rare case the ipString is not 8 characters long. This also requires for the method to have an throws Exception added, and you should probably choose a better exception rather than Exception.
+
+Finally your write to file can be enhanced to the following:
+
+//write IP Address to file
+File file = new File("SomeFilePath.txt");
+FileWriter fileWriter;
+
+try {
+    fileWriter = new FileWriter(file);
+    fileWriter.write(
+        String.format("ip=\"%s\"",
+                      ipAddress.substring(0, ipAddress.length() - 1)));
+
+    fileWriter.flush();
+    fileWriter.close();
+
+} catch (IOException exception) {
+    exception.printStackTrace();
+}
+Finally some general notes on coding style:
+
+Consider splitting into three functions – These three code blocks could be extracted into (two or three) separate functions, where one serves as the output to the next. This would follow the single-responsibility principle of coding. One variant could change this function into:
+
+void WritePublicIPAddressToFile(String resp, String filename)
+{
+   String ipAddress = findAndConvertIPAddress(resp);
+
+   if (!ipAddress.isEmpty()) {
+       writeIPAddressToFile(filename, ipAddress);
+   }
+}
+Here I assume that the findAndConvertIPAddress() would return the empty string if the IP-address is not found as expected, and use that to bypass the file write if necessary. Now this function has a much clearer responsibility of finding and writing that IP-address to the file. No need to read lots of code to understand whats happening.
+Use StringBuilder instead of String concatenation – In general try to avoid building new strings to a minimum, and use StringBuilder when building new strings, or a variation over String.format().
+Consider having the filename as a parameter – Your code might be constructed specific for Code Review, but with a name like WritePublicIPAddressToFile I would expect that filename was one of the parameters.
+Avoid using l as variable name – Especially in combination with i or 1, it can be really confusing to use lower-case L as a variable name. Use more descriptive names instead.
