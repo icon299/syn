@@ -60,3 +60,26 @@ public static String extractIP(String s) {
 That will return the IP if one is found in the string, or null otherwise.
 
 To check simply if it contains an IP, do if (extractIP(str) != null)
+    
+    
+    Mastering Regular Expressions (Third Edition) gives a pattern that will validate an IPv4 address, having four dot-separated integers in the range 0-255:
+
+^(?:[01]?\d\d?|2[0-4]\d|25[0-5])\.
+(?:[01]?\d\d?|2[0-4]\d|25[0-5])\.
+(?:[01]?\d\d?|2[0-4]\d|25[0-5])\.
+(?:[01]?\d\d?|2[0-4]\d|25[0-5])$
+Modifying that to find (rather than validate) an IP, to exclude things that look like IPs turning up within longer strings of dotted digits, and escape backslashes for Java string syntax, we can render it in a Java method as:
+
+public static String extractIP(String s) {
+    java.util.regex.Matcher m = java.util.regex.Pattern.compile(
+        "(?<!\\d|\\d\\.)" +
+        "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+        "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+        "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+        "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])" +
+        "(?!\\d|\\.\\d)").matcher(s);
+    return m.find() ? m.group() : null;
+}
+That will return the IP if one is found in the string, or null otherwise.
+
+To check simply if it contains an IP, do if (extractIP(str) != null) ....
