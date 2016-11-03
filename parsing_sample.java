@@ -45,3 +45,18 @@ public class IPAddressValidator{
       return matcher.matches();             
     }
 }
+
+
+public static String extractIP(String s) {
+    java.util.regex.Matcher m = java.util.regex.Pattern.compile(
+        "(?<!\\d|\\d\\.)" +
+        "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+        "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+        "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+        "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])" +
+        "(?!\\d|\\.\\d)").matcher(s);
+    return m.find() ? m.group() : null;
+}
+That will return the IP if one is found in the string, or null otherwise.
+
+To check simply if it contains an IP, do if (extractIP(str) != null)
